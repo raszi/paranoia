@@ -63,8 +63,10 @@ module Paranoia
   def restore!(opts = {})
     ActiveRecord::Base.transaction do
       run_callbacks(:restore) do
-        update_column paranoia_column, nil
-        restore_associated_records if opts[:recursive]
+        self.class.with_scope(self.class.only_deleted) do
+          update_column paranoia_column, nil
+          restore_associated_records if opts[:recursive]
+        end
       end
     end
   end
