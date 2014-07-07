@@ -17,6 +17,11 @@ module Paranoia
       end
     end
 
+    def without_deleted
+      where(paranoia_indexed_column => paranoia_false_value)
+    end
+    alias :undeleted :without_deleted
+
     def only_deleted
       with_deleted.where.not(paranoia_indexed_column => paranoia_false_value)
     end
@@ -166,7 +171,7 @@ class ActiveRecord::Base
     self.paranoia_column = options[:column] || :deleted_at
     self.paranoia_flag_column = options[:flag_column] || nil
     self.paranoia_indexed_column = options[:indexed_column] || paranoia_column
-    default_scope { where(paranoia_indexed_column => paranoia_false_value) }
+    default_scope { without_deleted }
 
     before_restore {
       self.class.notify_observers(:before_restore, self) if self.class.respond_to?(:notify_observers)
